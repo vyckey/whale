@@ -1,0 +1,10 @@
+rootProject.name = 'whale'
+
+include 'jddd-core'
+include 'whale-domain'
+include 'whale-acl'
+include 'whale-infrastructure'
+include 'whale-application'
+include 'whale-contract'
+include 'whale-api'
+include 'whale-task'
