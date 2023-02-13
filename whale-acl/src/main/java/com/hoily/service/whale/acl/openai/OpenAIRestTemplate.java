@@ -10,7 +10,6 @@ import com.hoily.service.whale.acl.openai.response.ListResultResponse;
 import com.hoily.service.whale.acl.openai.response.ModelInfoResponse;
 import com.hoily.service.whale.infrastructure.common.utils.JsonUtils;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.commons.codec.binary.Base64;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -52,7 +51,7 @@ public class OpenAIRestTemplate {
 
     @Autowired
     public void setBase64ApiKey(@Value("${openai.authentication.api_key}") String apiKey) {
-        this.apiKey = new String(Base64.decodeBase64(apiKey));
+        this.apiKey = apiKey;
     }
 
     private <T> T exchange(String uri, HttpMethod method, HttpEntity<?> requestEntity, ParameterizedTypeReference<T> responseType, Object... uriVariables) {

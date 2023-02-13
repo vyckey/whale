@@ -6,7 +6,7 @@ import com.hoily.service.whale.acl.wechat.security.AccessToken;
 import com.hoily.service.whale.acl.wechat.security.AccessTokenDTO;
 import com.hoily.service.whale.acl.wechat.security.AppConfig;
 import com.hoily.service.whale.acl.wechat.security.EncryptionConfig;
-import org.apache.commons.codec.binary.Base64;
+import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.codec.digest.DigestUtils;
 import org.apache.commons.lang3.tuple.Pair;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -21,6 +21,7 @@ import java.util.stream.Collectors;
  * @author vyckey
  * 2023/2/10 09:58
  */
+@Slf4j
 @Component
 public class WechatAuthenticationManager {
     private final WechatRestTemplate wechatRestTemplate;
@@ -37,8 +38,8 @@ public class WechatAuthenticationManager {
     }
 
     @Autowired
-    public void setAppConfig(@Value("${wechat.app.id}") String appId, @Value("${wechat.app.secret}") String appSecretBase64) {
-        this.appConfig = new AppConfig(appId, new String(Base64.decodeBase64(appSecretBase64)));
+    public void setAppConfig(@Value("${wechat.app.id}") String appId, @Value("${wechat.app.secret}") String appSecret) {
+        this.appConfig = new AppConfig(appId, appSecret);
     }
 
     private EncryptionConfig getEncryptionConfig() {
@@ -46,9 +47,9 @@ public class WechatAuthenticationManager {
     }
 
     @Autowired
-    public void setEncryptionConfig(@Value("${wechat.authentication.token}") String tokenBase64,
-                                    @Value("${wechat.authentication.encodingAESKey}") String encodingAESKeyBase64) {
-        this.encryptionConfig = new EncryptionConfig(new String(Base64.decodeBase64(tokenBase64)), new String(Base64.decodeBase64(encodingAESKeyBase64)));
+    public void setEncryptionConfig(@Value("${wechat.authentication.token}") String token,
+                                    @Value("${wechat.authentication.encodingAESKey}") String encodingAESKey) {
+        this.encryptionConfig = new EncryptionConfig(token, encodingAESKey);
     }
 
     /**
