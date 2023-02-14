@@ -1,5 +1,6 @@
 package com.hoily.service.whale.acl.openai.request;
 
+import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.Data;
 
@@ -12,6 +13,7 @@ import java.util.Map;
  * @author vyckey
  * 2023/2/12 13:35
  */
+@JsonInclude(JsonInclude.Include.NON_NULL)
 @Data
 public class CreateCompletionRequest implements Serializable {
     /**
@@ -34,6 +36,7 @@ public class CreateCompletionRequest implements Serializable {
      * Defaults to 16. The maximum number of tokens to generate in the completion.
      * The token count of your prompt plus max_tokens cannot exceed the model's context length. Most models have a context length of 2048 tokens (except for the newest models, which support 4096).
      */
+    @JsonProperty("max_tokens")
     private Integer maxTokens;
 
     /**
@@ -65,7 +68,8 @@ public class CreateCompletionRequest implements Serializable {
      * Include the log probabilities on the logprobs most likely tokens, as well the chosen tokens. For example, if logprobs is 5, the API will return a list of the 5 most likely tokens. The API will always return the logprob of the sampled token, so there may be up to logprobs+1 elements in the response.
      * The maximum value for logprobs is 5. If you need more than this, please contact us through our Help center and describe your use case.
      */
-    private Integer logprobs;
+    @JsonProperty("logprobs")
+    private Integer logProbs;
 
     /**
      * Defaults to false. Echo back the prompt in addition to the completion

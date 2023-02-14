@@ -14,5 +14,12 @@ if [[ -z $DOCKER_IMAGE ]]; then
   docker build -t whale-api:latest .
 fi
 
+# remove old containers
+CONTAINERS=$(docker ps -a | awk '/whale-api/ {print $1}')
+if [[ !(-z $CONTAINERS) ]]; then
+  docker stop $CONTAINERS
+  docker rm $CONTAINERS
+fi
+
 echo "[whale-api] docker start run..."
 docker run -it -p 80:8080 whale-api:latest

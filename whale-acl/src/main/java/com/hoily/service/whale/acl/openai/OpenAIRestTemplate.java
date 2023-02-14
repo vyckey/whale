@@ -75,7 +75,7 @@ public class OpenAIRestTemplate {
         HttpHeaders httpHeaders = new HttpHeaders();
         httpHeaders.setContentType(MediaType.APPLICATION_JSON);
         httpHeaders.setAccept(Collections.singletonList(MediaType.APPLICATION_JSON));
-        httpHeaders.set("Authorization", getApiKey());
+        httpHeaders.set("Authorization", "Bearer " + getApiKey());
 
         HttpEntity<String> httpEntity = new HttpEntity<>(requestBody, httpHeaders);
         return exchange(uri, method, httpEntity, new ParameterizedTypeReference<T>() {
