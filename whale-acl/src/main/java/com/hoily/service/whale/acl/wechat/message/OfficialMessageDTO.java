@@ -16,9 +16,8 @@ import lombok.ToString;
  */
 @JsonTypeInfo(
         use = JsonTypeInfo.Id.NAME,
-        include = JsonTypeInfo.As.EXISTING_PROPERTY,
-        property = "msgType",
-        defaultImpl = BaseMessageDTO.class,
+        property = "MsgType",
+        defaultImpl = OfficialMessageDTO.class,
         visible = true
 )
 @JsonSubTypes({

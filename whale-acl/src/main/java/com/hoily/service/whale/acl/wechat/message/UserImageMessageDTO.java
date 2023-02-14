@@ -14,7 +14,7 @@ import lombok.ToString;
 @EqualsAndHashCode(callSuper = true)
 @ToString(callSuper = true)
 public class UserImageMessageDTO extends UserMessageDTO {
-    public static final String MSG_TYPE = "text";
+    public static final String MSG_TYPE = "image";
 
     private Long mediaId;
 

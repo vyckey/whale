@@ -1,0 +1,15 @@
+whale-api:
+  server:
+    port: 8080
+
+openai:
+  authentication:
+    api_key: 'aGVsbG8sIHdvcmxkIQ=='
+
+wechat:
+  app:
+    id: 'wx0123456789'
+    secret: 'aGVsbG8sIHdvcmxkIQ=='
+  authentication:
+    token: 'aGVsbG8sIHdvcmxkIQ=='
+    encodingAESKey: 'aGVsbG8sIHdvcmxkIQ=='

@@ -1,5 +1,7 @@
 package com.hoily.service.whale.acl.wechat.message;
 
+import com.fasterxml.jackson.databind.PropertyNamingStrategies;
+import com.fasterxml.jackson.databind.annotation.JsonNaming;
 import lombok.Data;
 
 import java.io.Serializable;
@@ -10,6 +12,7 @@ import java.io.Serializable;
  * @author vyckey
  * 2023/2/9 21:13
  */
+@JsonNaming(value = PropertyNamingStrategies.UpperCamelCaseStrategy.class)
 @Data
 public class BaseMessageDTO implements Serializable {
     protected String fromUserName;

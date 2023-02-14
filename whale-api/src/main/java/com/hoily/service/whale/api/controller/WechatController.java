@@ -1,6 +1,7 @@
 package com.hoily.service.whale.api.controller;
 
 import com.hoily.service.whale.acl.wechat.WechatAuthenticationManager;
+import com.hoily.service.whale.acl.wechat.base.XmlWrapper;
 import com.hoily.service.whale.acl.wechat.message.OfficialMessageDTO;
 import com.hoily.service.whale.acl.wechat.message.UserMessageDTO;
 import com.hoily.service.whale.application.wechat.WechatMessageService;
@@ -13,6 +14,7 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
 
 /**
@@ -30,6 +32,7 @@ public class WechatController {
     private final WechatMessageService wechatMessageService;
 
     @GetMapping("access/validate")
+    @ResponseBody
     public String validateAccess(@RequestHeader String signature, @RequestHeader String timestamp, @RequestHeader String nonce, @RequestHeader String echostr) {
         if (authenticationManager.signatureValid(timestamp, nonce, signature)) {
             return echostr;
@@ -38,9 +41,11 @@ public class WechatController {
     }
 
     @PostMapping(value = "/message/reply", consumes = MediaType.APPLICATION_XML_VALUE, produces = MediaType.APPLICATION_XML_VALUE)
-    public OfficialMessageDTO replyMessage(@RequestBody UserMessageDTO request) {
-        OfficialMessageDTO officialMessage = wechatMessageService.autoReply(request);
-        log.info("wechat reply message. user:{}\nofficial:{}", JsonUtils.toJson(request), JsonUtils.toJson(officialMessage));
-        return officialMessage;
+    @ResponseBody
+    public XmlWrapper<OfficialMessageDTO> replyMessage(@RequestBody XmlWrapper<UserMessageDTO> request) {
+        UserMessageDTO userMessage = request.getObject();
+        OfficialMessageDTO officialMessage = wechatMessageService.autoReply(userMessage);
+        log.info("wechat reply message. user:{}\nofficial:{}", JsonUtils.toJson(userMessage), JsonUtils.toJson(officialMessage));
+        return XmlWrapper.of(officialMessage);
     }
 }

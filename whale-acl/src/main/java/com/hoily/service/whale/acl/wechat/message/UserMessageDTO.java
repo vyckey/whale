@@ -16,9 +16,8 @@ import lombok.ToString;
  */
 @JsonTypeInfo(
         use = JsonTypeInfo.Id.NAME,
-        include = JsonTypeInfo.As.EXISTING_PROPERTY,
-        property = "msgType",
-        defaultImpl = BaseMessageDTO.class,
+        property = "MsgType",
+        defaultImpl = UserMessageDTO.class,
         visible = true
 )
 @JsonSubTypes({
@@ -32,7 +31,7 @@ import lombok.ToString;
 public class UserMessageDTO extends BaseMessageDTO {
     protected Long msgId;
 
-    protected Long msgDataId;
+    protected String msgDataId;
 
     protected Integer idx;
 }
