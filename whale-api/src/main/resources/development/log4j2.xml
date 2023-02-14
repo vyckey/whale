@@ -4,7 +4,7 @@
         <Property name="PID">????</Property>
         <Property name="APP_NAME">whale-api</Property>
         <Property name="LOG_LEVEL_PATTERN">%5p</Property>
-        <Property name="LOG_PATTERN">[$${env:HOST:-localhost}][${APP_NAME}][%d{yyyy-MM-dd HH:mm:ss.SSS}][${LOG_LEVEL_PATTERN}][${sys:PID}][%15.15t][%-40.40c{1.}] : [%X{logId}][%X{PTRACER-TRACE-UUID}][%X{PTRACER-SPAN-UUID}]%m%n${LOG_EXCEPTION_CONVERSION_WORD}
+        <Property name="LOG_PATTERN">[$${env:HOST:-localhost}][${APP_NAME}][%d{yyyy-MM-dd HH:mm:ss.SSS}][${LOG_LEVEL_PATTERN}][${sys:PID}][%15.15t][%-40.40c{1.}] : [%X{logId}]%m%n
         </Property>
         <Property name="LOG_PATH">./logs</Property>
     </Properties>
@@ -51,7 +51,6 @@
         <logger name="org.springframework.boot.actuate.autoconfigure.CrshAutoConfiguration" level="warn"/>
         <logger name="org.springframework.boot.actuate.endpoint.jmx" level="warn"/>
         <Root level="info">
-            <AppenderRef ref="Console"/>
             <AppenderRef ref="Async"/>
         </Root>
     </Loggers>

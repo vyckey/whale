@@ -40,6 +40,7 @@ ext {
     springBootVersion = '2.7.0'
     springAspectsVersion = '5.3.21'
     mysqlConnectorVersion = '8.0.29'
+    hibernateValidatorVersion = '8.0.0.Final'
 
 }
 
@@ -186,7 +187,7 @@ project(":jddd-core") {
 project(":whale-contract") {
     version = '0.0.1-SNAPSHOT'
     dependencies {
-
+        api "org.hibernate:hibernate-validator:$hibernateValidatorVersion"
     }
 }
 
