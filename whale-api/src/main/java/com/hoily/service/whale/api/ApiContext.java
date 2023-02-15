@@ -5,7 +5,6 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
 import com.hoily.service.whale.application.ApplicationContext;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.WebApplicationType;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
@@ -26,10 +25,6 @@ import java.util.concurrent.TimeUnit;
 @EnableAspectJAutoProxy(proxyTargetClass = true)
 @Import(ApplicationContext.class)
 public class ApiContext {
-
-    @Value("${whale-api.server.port}")
-    private int serverPort;
-
     public static void main(String[] args) {
         SpringApplication application = new SpringApplication(ApiContext.class);
         application.setWebApplicationType(WebApplicationType.SERVLET);
@@ -67,7 +62,7 @@ public class ApiContext {
             if (factory instanceof TomcatServletWebServerFactory) {
                 TomcatServletWebServerFactory tomcatFactory = (TomcatServletWebServerFactory) factory;
                 tomcatFactory.addConnectorCustomizers(connector -> {
-                    connector.setPort(serverPort);
+                    // connector.setPort(serverPort);
                 });
             }
         };

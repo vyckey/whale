@@ -34,18 +34,20 @@ public class WechatController {
     @GetMapping("access/validate")
     @ResponseBody
     public String validateAccess(@RequestParam("signature") String signature, @RequestParam("timestamp") String timestamp, @RequestParam("nonce") String nonce, @RequestParam("echostr") String echostr) {
+        log.info("wechat access validate... {}", timestamp);
         if (authenticationManager.signatureValid(timestamp, nonce, signature)) {
             return echostr;
         }
-        return "";
+        return "invalid signature";
     }
 
     @PostMapping(value = "/message/reply", consumes = MediaType.APPLICATION_XML_VALUE, produces = MediaType.APPLICATION_XML_VALUE)
     @ResponseBody
     public XmlWrapper<OfficialMessageDTO> replyMessage(@RequestBody XmlWrapper<UserMessageDTO> request) {
         UserMessageDTO userMessage = request.getObject();
+        log.info("wechat reply message. user:{}", JsonUtils.toJson(userMessage));
         OfficialMessageDTO officialMessage = wechatMessageService.autoReply(userMessage);
-        log.info("wechat reply message. user:{}\nofficial:{}", JsonUtils.toJson(userMessage), JsonUtils.toJson(officialMessage));
+        log.info("wechat reply message. from_user:{}\nofficial:{}", userMessage.getFromUserName(), JsonUtils.toJson(officialMessage));
         return XmlWrapper.of(officialMessage);
     }
 }
