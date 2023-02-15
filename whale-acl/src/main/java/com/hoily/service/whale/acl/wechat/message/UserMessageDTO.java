@@ -21,6 +21,7 @@ import lombok.ToString;
         visible = true
 )
 @JsonSubTypes({
+        @JsonSubTypes.Type(value = UserEventMessageDTO.class, name = UserEventMessageDTO.MSG_TYPE),
         @JsonSubTypes.Type(value = UserTextMessageDTO.class, name = UserTextMessageDTO.MSG_TYPE),
         @JsonSubTypes.Type(value = UserImageMessageDTO.class, name = UserImageMessageDTO.MSG_TYPE),
         @JsonSubTypes.Type(value = UserLinkMessageDTO.class, name = UserLinkMessageDTO.MSG_TYPE),

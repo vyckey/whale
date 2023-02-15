@@ -5,6 +5,7 @@ import com.fasterxml.jackson.databind.annotation.JsonNaming;
 import lombok.Data;
 
 import java.io.Serializable;
+import java.util.Objects;
 
 /**
  * Wechat basic message dto
@@ -26,6 +27,10 @@ public class BaseMessageDTO implements Serializable {
     public void setUserName(String fromUserName, String toUserName) {
         this.fromUserName = fromUserName;
         this.toUserName = toUserName;
+    }
+
+    public boolean isMsgType(String msgType) {
+        return Objects.equals(this.msgType, msgType);
     }
 
 }

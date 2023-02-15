@@ -31,9 +31,10 @@ public class WechatController {
     private final WechatAuthenticationManager authenticationManager;
     private final WechatMessageService wechatMessageService;
 
-    @GetMapping("access/validate")
+    @GetMapping("callback")
     @ResponseBody
-    public String validateAccess(@RequestParam("signature") String signature, @RequestParam("timestamp") String timestamp, @RequestParam("nonce") String nonce, @RequestParam("echostr") String echostr) {
+    public String checkSignature(@RequestParam("signature") String signature, @RequestParam("timestamp") String timestamp,
+                                 @RequestParam("nonce") String nonce, @RequestParam("echostr") String echostr) {
         log.info("wechat access validate... {}", timestamp);
         if (authenticationManager.signatureValid(timestamp, nonce, signature)) {
             return echostr;
@@ -41,13 +42,13 @@ public class WechatController {
         return "invalid signature";
     }
 
-    @PostMapping(value = "/message/reply", consumes = MediaType.APPLICATION_XML_VALUE, produces = MediaType.APPLICATION_XML_VALUE)
+    @PostMapping(value = "callback", consumes = MediaType.APPLICATION_XML_VALUE, produces = MediaType.APPLICATION_XML_VALUE)
     @ResponseBody
-    public XmlWrapper<OfficialMessageDTO> replyMessage(@RequestBody XmlWrapper<UserMessageDTO> request) {
+    public XmlWrapper<OfficialMessageDTO> callback(@RequestBody XmlWrapper<UserMessageDTO> request) {
         UserMessageDTO userMessage = request.getObject();
-        log.info("wechat reply message. user:{}", JsonUtils.toJson(userMessage));
-        OfficialMessageDTO officialMessage = wechatMessageService.autoReply(userMessage);
-        log.info("wechat reply message. from_user:{}\nofficial:{}", userMessage.getFromUserName(), JsonUtils.toJson(officialMessage));
-        return XmlWrapper.of(officialMessage);
+        log.info("wechat callback message:{}", JsonUtils.toJson(userMessage));
+        OfficialMessageDTO officialMessage = wechatMessageService.handleMessage(userMessage);
+        log.info("wechat callback reply:{} => {}", userMessage.getFromUserName(), JsonUtils.toJson(officialMessage));
+        return officialMessage != null ? XmlWrapper.of(officialMessage) : null;
     }
 }

@@ -32,21 +32,26 @@ public class WechatMessageService {
         request.setPrompt(prompt);
         request.setTemperature(0.0f);
         request.setMaxTokens(7);
-        CompletionResponse response = openAIRestTemplate.completion(request);
-        log.info("chatgpt completion '{}'\nresponse:{}", prompt, JsonUtils.toJson(response));
-        return Optional.ofNullable(response).map(CompletionResponse::getChoices)
-                .filter(CollectionUtils::isNotEmpty).map(list -> list.get(0))
-                .map(CompletionResponse.ChoiceResponse::getText);
+        try {
+            CompletionResponse response = openAIRestTemplate.completion(request);
+            log.info("chatgpt completion '{}'\nresponse:{}", prompt, JsonUtils.toJson(response));
+            return Optional.ofNullable(response).map(CompletionResponse::getChoices)
+                    .filter(CollectionUtils::isNotEmpty).map(list -> list.get(0))
+                    .map(CompletionResponse.ChoiceResponse::getText);
+        } catch (Exception e) {
+            log.error("chatgpt completion '{}' ex", prompt, e);
+            return Optional.empty();
+        }
     }
 
-    public OfficialMessageDTO autoReply(UserMessageDTO userMessage) {
+    public OfficialMessageDTO handleMessage(UserMessageDTO userMessage) {
         if (userMessage instanceof UserTextMessageDTO) {
             UserTextMessageDTO userTextMessage = (UserTextMessageDTO) userMessage;
             Optional<String> answerOptional = generateChatGPTAnswer(userTextMessage.getContent());
             if (answerOptional.isPresent()) {
                 OfficialTextMessageDTO officialMessage = new OfficialTextMessageDTO();
                 officialMessage.setUserName(userMessage.getToUserName(), userMessage.getFromUserName());
-                officialMessage.setCreateTime(System.currentTimeMillis());
+                officialMessage.setCreateTime(System.currentTimeMillis() / 1000L);
                 officialMessage.setContent(answerOptional.get());
                 return officialMessage;
             }

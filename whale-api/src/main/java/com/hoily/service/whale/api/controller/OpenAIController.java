@@ -3,10 +3,13 @@ package com.hoily.service.whale.api.controller;
 import com.hoily.service.whale.acl.openai.OpenAIRestTemplate;
 import com.hoily.service.whale.acl.openai.request.CreateCompletionRequest;
 import com.hoily.service.whale.acl.openai.response.CompletionResponse;
+import com.hoily.service.whale.acl.openai.response.ListResultResponse;
+import com.hoily.service.whale.acl.openai.response.ModelInfoResponse;
 import com.hoily.service.whale.contract.response.BaseResponse;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -17,6 +20,7 @@ import javax.validation.Valid;
 import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.NotNull;
 import java.io.Serializable;
+import java.util.List;
 
 /**
  * description is here
@@ -30,6 +34,13 @@ import java.io.Serializable;
 @AllArgsConstructor
 public class OpenAIController {
     private final OpenAIRestTemplate openAIRestTemplate;
+
+    @GetMapping(value = "/models")
+    @ResponseBody
+    public BaseResponse<List<ModelInfoResponse>> listModels() {
+        ListResultResponse<ModelInfoResponse> response = openAIRestTemplate.listModels();
+        return BaseResponse.success(response.getData()).build();
+    }
 
     @PostMapping(value = "/completion")
     @ResponseBody
