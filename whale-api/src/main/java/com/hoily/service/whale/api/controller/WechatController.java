@@ -42,7 +42,7 @@ public class WechatController {
         return "invalid signature";
     }
 
-    @PostMapping(value = "callback", consumes = MediaType.APPLICATION_XML_VALUE, produces = MediaType.APPLICATION_XML_VALUE)
+    @PostMapping(value = "callback", consumes = {MediaType.TEXT_XML_VALUE, MediaType.APPLICATION_XML_VALUE}, produces = {MediaType.TEXT_XML_VALUE, MediaType.APPLICATION_XML_VALUE})
     @ResponseBody
     public XmlWrapper<OfficialMessageDTO> callback(@RequestBody XmlWrapper<UserMessageDTO> request) {
         UserMessageDTO userMessage = request.getObject();

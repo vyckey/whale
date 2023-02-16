@@ -2,7 +2,10 @@ package com.hoily.service.whale.acl.openai.request;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.annotation.JsonSetter;
+import lombok.AccessLevel;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 
 import java.io.Serializable;
 import java.util.Map;
@@ -15,6 +18,7 @@ import java.util.Map;
  */
 @JsonInclude(JsonInclude.Include.NON_NULL)
 @Data
+@NoArgsConstructor(access = AccessLevel.PRIVATE)
 public class CreateCompletionRequest implements Serializable {
     /**
      * ID of the model to use. You can use the List models API to see all of your available models, or see our Model overview for descriptions of them.
@@ -120,6 +124,11 @@ public class CreateCompletionRequest implements Serializable {
 
     public CreateCompletionRequest(String model) {
         this.model = model;
+    }
+
+    @JsonSetter
+    protected void setPrompt(Object prompt) {
+        this.prompt = prompt;
     }
 
     public void setPrompt(String... prompt) {
