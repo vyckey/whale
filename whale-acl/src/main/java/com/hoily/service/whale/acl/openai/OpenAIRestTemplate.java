@@ -2,10 +2,18 @@ package com.hoily.service.whale.acl.openai;
 
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.google.common.base.Preconditions;
+import com.hoily.service.whale.acl.openai.request.AudioTranscriptionRequest;
+import com.hoily.service.whale.acl.openai.request.AudioTranslationRequest;
+import com.hoily.service.whale.acl.openai.request.ChatCompletionRequest;
 import com.hoily.service.whale.acl.openai.request.CreateCompletionRequest;
 import com.hoily.service.whale.acl.openai.request.CreateEditRequest;
+import com.hoily.service.whale.acl.openai.request.ImageEditRequest;
+import com.hoily.service.whale.acl.openai.request.ImageGenerateRequest;
+import com.hoily.service.whale.acl.openai.request.ImageVariationRequest;
+import com.hoily.service.whale.acl.openai.response.AudioResponse;
 import com.hoily.service.whale.acl.openai.response.CompletionResponse;
 import com.hoily.service.whale.acl.openai.response.EngineInfoResponse;
+import com.hoily.service.whale.acl.openai.response.ImageResponse;
 import com.hoily.service.whale.acl.openai.response.ListResultResponse;
 import com.hoily.service.whale.acl.openai.response.ModelInfoResponse;
 import com.hoily.service.whale.infrastructure.common.utils.JsonUtils;
@@ -116,10 +124,58 @@ public class OpenAIRestTemplate {
     }
 
     /**
+     * Given a chat conversation, the model will return a chat completion response.
+     */
+    public CompletionResponse chatCompletion(ChatCompletionRequest request) {
+        return exchange("v1/chat/completions", HttpMethod.POST, request, new TypeReference<CompletionResponse>() {
+        });
+    }
+
+    /**
      * Given a prompt and an instruction, the model will return an edited version of the prompt.
      */
     public CompletionResponse edit(CreateEditRequest request) {
         return exchange("v1/edits", HttpMethod.POST, request, new TypeReference<CompletionResponse>() {
+        });
+    }
+
+    /**
+     * Given a prompt and/or an input image, the model will generate a new image.
+     */
+    public ImageResponse createImage(ImageGenerateRequest request) {
+        return exchange("v1/images/generations", HttpMethod.POST, request, new TypeReference<ImageResponse>() {
+        });
+    }
+
+    /**
+     * Creates an edited or extended image given an original image and a prompt.
+     */
+    public ImageResponse editImage(ImageEditRequest request) {
+        return exchange("v1/images/edits", HttpMethod.POST, request, new TypeReference<ImageResponse>() {
+        });
+    }
+
+    /**
+     * Creates a variation of a given image.
+     */
+    public ImageResponse variationImage(ImageVariationRequest request) {
+        return exchange("v1/images/variations", HttpMethod.POST, request, new TypeReference<ImageResponse>() {
+        });
+    }
+
+    /**
+     * Transcribes audio into the input language.
+     */
+    public AudioResponse transcriptionAudio(AudioTranscriptionRequest request) {
+        return exchange("v1/audio/transcriptions", HttpMethod.POST, request, new TypeReference<AudioResponse>() {
+        });
+    }
+
+    /**
+     * Translates audio into into English.
+     */
+    public AudioResponse translateAudio(AudioTranslationRequest request) {
+        return exchange("v1/audio/translations", HttpMethod.POST, request, new TypeReference<AudioResponse>() {
         });
     }
 

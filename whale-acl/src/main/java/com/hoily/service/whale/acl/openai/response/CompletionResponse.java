@@ -1,6 +1,7 @@
 package com.hoily.service.whale.acl.openai.response;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
+import com.hoily.service.whale.acl.openai.request.ChatMessage;
 import lombok.Data;
 
 import java.io.Serializable;
@@ -8,7 +9,7 @@ import java.util.Date;
 import java.util.List;
 
 /**
- * description is here
+ * Completion response
  *
  * @author vyckey
  * 2023/2/12 14:04
@@ -31,6 +32,8 @@ public class CompletionResponse implements TypedObject {
     public static class ChoiceResponse implements Serializable {
 
         private String text;
+
+        private ChatMessage message;
 
         private Integer index;
 

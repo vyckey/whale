@@ -1,6 +1,7 @@
 package com.hoily.service.whale.api.controller;
 
 import com.hoily.service.whale.acl.openai.OpenAIRestTemplate;
+import com.hoily.service.whale.acl.openai.request.ChatCompletionRequest;
 import com.hoily.service.whale.acl.openai.request.CreateCompletionRequest;
 import com.hoily.service.whale.acl.openai.response.CompletionResponse;
 import com.hoily.service.whale.acl.openai.response.ListResultResponse;
@@ -22,7 +23,7 @@ import java.util.List;
 import java.util.Map;
 
 /**
- * description is here
+ * OpenAI Controller
  *
  * @author vyckey
  * 2023/2/14 17:11
@@ -56,6 +57,25 @@ public class OpenAIController {
             return BaseResponse.success(response).build();
         } catch (Exception e) {
             log.error("openai completion fail, request:{}", JsonUtils.toJson(completionRequest), e);
+            return BaseResponse.<CompletionResponse>fail(50000, e.getMessage()).build();
+        }
+    }
+
+    @PostMapping(value = "/chat/completion")
+    @ResponseBody
+    public BaseResponse<CompletionResponse> chatCompletion(@Valid @RequestBody Map<String, Object> request) {
+        ChatCompletionRequest completionRequest = JsonUtils.fromJson(JsonUtils.toJson(request), ChatCompletionRequest.class);
+        if (StringUtils.isBlank(completionRequest.getModel())) {
+            completionRequest.setModel("gpt-3.5-turbo");
+        }
+        if (completionRequest.getTemperature() == null) {
+            completionRequest.setTemperature(0.5f);
+        }
+        try {
+            CompletionResponse response = openAIRestTemplate.chatCompletion(completionRequest);
+            return BaseResponse.success(response).build();
+        } catch (Exception e) {
+            log.error("openai chat completion fail, request:{}", JsonUtils.toJson(completionRequest), e);
             return BaseResponse.<CompletionResponse>fail(50000, e.getMessage()).build();
         }
     }

@@ -1,6 +1,8 @@
 package com.hoily.service.whale.acl.openai;
 
 import com.hoily.service.whale.acl.AclContext;
+import com.hoily.service.whale.acl.openai.request.ChatCompletionRequest;
+import com.hoily.service.whale.acl.openai.request.ChatMessage;
 import com.hoily.service.whale.acl.openai.request.CreateCompletionRequest;
 import com.hoily.service.whale.acl.openai.response.CompletionResponse;
 import org.apache.commons.collections.CollectionUtils;
@@ -41,6 +43,21 @@ public class OpenAIRestTemplateTest {
         Optional<String> textOptional = Optional.ofNullable(response).map(CompletionResponse::getChoices)
                 .filter(CollectionUtils::isNotEmpty).map(list -> list.get(0))
                 .map(CompletionResponse.ChoiceResponse::getText);
+        Assert.assertTrue(textOptional.isPresent());
+    }
+
+    @Test
+    public void chatCompletionTest() {
+        ChatCompletionRequest request = new ChatCompletionRequest("gpt-3.5-turbo");
+        request.addMessage(ChatMessage.system("You are a helpful assistant."))
+                .addMessage(ChatMessage.user("Who won the world series in 2020?"))
+                .addMessage(ChatMessage.assistant("The Los Angeles Dodgers won the World Series in 2020."))
+                .addMessage(ChatMessage.user("Where was it played?"));
+        CompletionResponse response = openAIRestTemplate.chatCompletion(request);
+        Optional<String> textOptional = Optional.ofNullable(response).map(CompletionResponse::getChoices)
+                .filter(CollectionUtils::isNotEmpty).map(list -> list.get(0))
+                .map(CompletionResponse.ChoiceResponse::getMessage)
+                .map(ChatMessage::getContent);
         Assert.assertTrue(textOptional.isPresent());
     }
 }
