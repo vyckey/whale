@@ -41,6 +41,7 @@ ext {
     springAspectsVersion = '5.3.21'
     mysqlConnectorVersion = '8.0.29'
     hibernateValidatorVersion = '8.0.0.Final'
+    jcommanderVersion = '1.82'
 
 }
 
@@ -219,6 +220,8 @@ project(":whale-application") {
         api project(":whale-infrastructure")
         api project(":whale-acl")
         api project(":whale-contract")
+        // https://mvnrepository.com/artifact/com.beust/jcommander
+        implementation "com.beust:jcommander:${jcommanderVersion}"
     }
 }
 
