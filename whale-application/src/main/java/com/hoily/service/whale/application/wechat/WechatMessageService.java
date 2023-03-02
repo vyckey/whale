@@ -4,7 +4,9 @@ import com.hoily.service.whale.acl.openai.OpenAIRestTemplate;
 import com.hoily.service.whale.acl.openai.request.ChatCompletionRequest;
 import com.hoily.service.whale.acl.openai.request.ChatMessage;
 import com.hoily.service.whale.acl.openai.request.CreateCompletionRequest;
+import com.hoily.service.whale.acl.openai.request.ImageGenerateRequest;
 import com.hoily.service.whale.acl.openai.response.CompletionResponse;
+import com.hoily.service.whale.acl.openai.response.ImageResponse;
 import com.hoily.service.whale.acl.wechat.message.OfficialMessageDTO;
 import com.hoily.service.whale.acl.wechat.message.OfficialTextMessageDTO;
 import com.hoily.service.whale.acl.wechat.message.UserMessageDTO;
@@ -14,7 +16,6 @@ import com.hoily.service.whale.infrastructure.common.utils.JsonUtils;
 import com.hoily.service.whale.infrastructure.common.utils.StringUtils;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.commons.collections.CollectionUtils;
 import org.springframework.stereotype.Component;
 
 import java.util.Optional;
@@ -33,60 +34,81 @@ public class WechatMessageService {
     private final UserStateManager userStateManager;
     private final CommandExecutor commandExecutor;
 
-    private Optional<String> generateChatGPTAnswer(String user, String prompt) {
-        UserState userState = userStateManager.getUserState(user);
-        Optional<String> modelOptional = Optional.ofNullable(userState).map(UserState::getOpenAIModel);
-
-        if (userState != null && userState.isOpenAIChatMode()) {
-            ChatCompletionRequest request = new ChatCompletionRequest(modelOptional.orElse("gpt-3.5-turbo"), ChatMessage.user(prompt));
-            request.setTemperature(0.4f);
-            request.setMaxTokens(1024);
-            try {
-                CompletionResponse response = openAIRestTemplate.chatCompletion(request);
-                log.info("chatgpt chat completion '{}'\nresponse:{}", prompt, JsonUtils.toJson(response));
-                return Optional.ofNullable(response).map(CompletionResponse::getChoices)
-                        .filter(CollectionUtils::isNotEmpty).map(list -> list.get(0))
-                        .map(CompletionResponse.ChoiceResponse::getMessage).map(ChatMessage::getContent)
-                        .map(text -> StringUtils.trim(text, '\n'));
-            } catch (Exception e) {
-                log.error("chatgpt chat completion '{}' ex", prompt, e);
-                return Optional.empty();
-            }
-        }
-
-        CreateCompletionRequest request = new CreateCompletionRequest(modelOptional.orElse("text-davinci-003"));
-        request.setPrompt(prompt);
+    private Optional<String> completion(String model, String user, String content) {
+        CreateCompletionRequest request = new CreateCompletionRequest(model);
+        request.setPrompt(content);
         request.setTemperature(0.4f);
         request.setMaxTokens(1024);
+        request.setUser(user);
         try {
             CompletionResponse response = openAIRestTemplate.completion(request);
-            log.info("chatgpt completion '{}'\nresponse:{}", prompt, JsonUtils.toJson(response));
-            return Optional.ofNullable(response).map(CompletionResponse::getChoices)
-                    .filter(CollectionUtils::isNotEmpty).map(list -> list.get(0))
-                    .map(CompletionResponse.ChoiceResponse::getText)
-                    .map(text -> StringUtils.trim(text, '\n'));
+            log.info("chatgpt completion '{}'\nresponse:{}", content, JsonUtils.toJson(response));
+            return Optional.ofNullable(response).map(CompletionResponse::getPossibleContent).map(text -> StringUtils.trim(text, '\n'));
         } catch (Exception e) {
-            log.error("chatgpt completion '{}' ex", prompt, e);
+            log.error("chatgpt completion '{}' ex", content, e);
             return Optional.empty();
         }
     }
 
+    private Optional<String> chatCompletion(String model, String user, String content) {
+        ChatCompletionRequest request = new ChatCompletionRequest(model, ChatMessage.user(content));
+        request.setTemperature(0.4f);
+        request.setMaxTokens(1024);
+        request.setUser(user);
+        try {
+            CompletionResponse response = openAIRestTemplate.chatCompletion(request);
+            log.info("chatgpt chat completion '{}'\nresponse:{}", content, JsonUtils.toJson(response));
+            return Optional.ofNullable(response).map(CompletionResponse::getPossibleContent).map(text -> StringUtils.trim(text, '\n'));
+        } catch (Exception e) {
+            log.error("chatgpt chat completion '{}' ex", content, e);
+            return Optional.empty();
+        }
+    }
+
+    private Optional<String> createImage(String user, String content) {
+        ImageGenerateRequest request = new ImageGenerateRequest(content);
+        request.setUser(user);
+        try {
+            ImageResponse response = openAIRestTemplate.createImage(request);
+            log.info("chatgpt image create '{}'\nresponse:{}", content, JsonUtils.toJson(response));
+            return Optional.ofNullable(response).map(ImageResponse::getPossibleImageUrl).map(text -> StringUtils.trim(text, '\n'));
+        } catch (Exception e) {
+            log.error("chatgpt image create '{}' ex", content, e);
+            return Optional.empty();
+        }
+    }
+
+    public OfficialMessageDTO handleMessage(UserTextMessageDTO userMessage) {
+        String user = userMessage.getFromUserName();
+        String content = userMessage.getContent();
+        UserState userState = userStateManager.getUserState(user);
+        Optional<String> modelOptional = Optional.ofNullable(userState).map(UserState::getOpenAIModel);
+
+        OfficialTextMessageDTO officialMessage = new OfficialTextMessageDTO();
+        String defaultAnswer = "不要意思，暂时回答不了你的问题哦~请联系管理员微信号\"vyckey0213\"！";
+        Optional<String> answerOptional;
+        if (commandExecutor.isCommand(content)) {
+            answerOptional = Optional.ofNullable(commandExecutor.execute(content, userMessage.getFromUserName()));
+            officialMessage.setContent(answerOptional.orElse(defaultAnswer));
+        } else if (userState == null || OpenAITaskType.CHAT.equals(userState.getOpenAITaskType())) {
+            answerOptional = chatCompletion(modelOptional.orElse("gpt-3.5-turbo"), user, content);
+            officialMessage.setContent(answerOptional.orElse(defaultAnswer));
+        } else if (OpenAITaskType.IMAGE.equals(userState.getOpenAITaskType())) {
+            answerOptional = createImage(user, content);
+            officialMessage.setContent(answerOptional.orElse(defaultAnswer));
+        } else {
+            answerOptional = completion(modelOptional.orElse("text-davinci-003"), user, content);
+            officialMessage.setContent(answerOptional.orElse(defaultAnswer));
+        }
+
+        officialMessage.setUserName(userMessage.getToUserName(), userMessage.getFromUserName());
+        officialMessage.setCreateTime(System.currentTimeMillis() / 1000L);
+        return officialMessage;
+    }
+
     public OfficialMessageDTO handleMessage(UserMessageDTO userMessage) {
         if (userMessage instanceof UserTextMessageDTO) {
-            UserTextMessageDTO userTextMessage = (UserTextMessageDTO) userMessage;
-            String userContent = userTextMessage.getContent();
-            Optional<String> answerOptional;
-            if (commandExecutor.isCommand(userContent)) {
-                answerOptional = Optional.ofNullable(commandExecutor.execute(userContent, userMessage.getFromUserName()));
-            } else {
-                answerOptional = generateChatGPTAnswer(userMessage.getFromUserName(), userContent);
-            }
-
-            OfficialTextMessageDTO officialMessage = new OfficialTextMessageDTO();
-            officialMessage.setUserName(userMessage.getToUserName(), userMessage.getFromUserName());
-            officialMessage.setCreateTime(System.currentTimeMillis() / 1000L);
-            officialMessage.setContent(answerOptional.orElse("不要意思，暂时回答不了你的问题哦~请联系管理员微信号\"vyckey0213\"！"));
-            return officialMessage;
+            return handleMessage((UserTextMessageDTO) userMessage);
         }
         return null;
     }

@@ -14,8 +14,8 @@ import java.util.List;
 @Data
 @Parameters(commandNames = "chatgpt", commandDescription = "ChatGPT commands")
 public class ChatGPTCommand {
-    @Parameter(names = {"--chat", "-c"}, description = "enable chat mode")
-    private boolean chatMode;
+    @Parameter(names = {"--task", "-t"}, description = "set task type, include: chat_old, chat, image")
+    private String taskType;
 
     @Parameter(names = {"--model", "-m"}, description = "set model name")
     private String model;

@@ -3,6 +3,7 @@ package com.hoily.service.whale.acl.openai.response;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.ToString;
+import org.apache.commons.collections.CollectionUtils;
 
 import java.io.Serializable;
 import java.util.Date;
@@ -18,6 +19,10 @@ import java.util.Date;
 @ToString(callSuper = true)
 public class ImageResponse extends ListResultResponse<ImageResponse.ImageResult> {
     private Date createdAt;
+
+    public String getPossibleImageUrl() {
+        return CollectionUtils.isNotEmpty(getData()) ? getData().get(0).getUrl() : null;
+    }
 
     public void setCreated(Integer created) {
         if (created != null) {

@@ -12,7 +12,7 @@ import lombok.Data;
 public class UserState {
     private final String userId;
 
-    private boolean openAIChatMode;
+    private OpenAITaskType openAITaskType = OpenAITaskType.CHAT;
     private String openAIModel;
 
     public UserState(String userId) {

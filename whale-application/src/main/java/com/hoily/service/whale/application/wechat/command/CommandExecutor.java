@@ -2,6 +2,7 @@ package com.hoily.service.whale.application.wechat.command;
 
 import com.beust.jcommander.JCommander;
 import com.google.common.collect.ImmutableSet;
+import com.hoily.service.whale.application.wechat.OpenAITaskType;
 import com.hoily.service.whale.application.wechat.UserState;
 import com.hoily.service.whale.application.wechat.UserStateManager;
 import com.hoily.service.whale.infrastructure.common.utils.StringUtils;
@@ -53,12 +54,17 @@ public class CommandExecutor {
                 return execute((ChatGPTCommand) subCommand, user);
             }
         }
-        return null;
+        return "hello, i am hoily, nice to meet you! wuhu~~~";
     }
 
     private String execute(ChatGPTCommand command, String user) {
         UserState userState = userStateManager.createUserStateIfAbsent(user);
-        userState.setOpenAIChatMode(command.isChatMode());
+        if (StringUtils.isNotBlank(command.getTaskType())) {
+            OpenAITaskType taskType = OpenAITaskType.of(command.getTaskType());
+            if (taskType != null) {
+                userState.setOpenAITaskType(taskType);
+            }
+        }
         if (StringUtils.isNotBlank(command.getModel())) {
             userState.setOpenAIModel(command.getModel());
         }
