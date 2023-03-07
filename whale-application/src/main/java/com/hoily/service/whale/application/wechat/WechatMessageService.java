@@ -7,18 +7,27 @@ import com.hoily.service.whale.acl.openai.request.CreateCompletionRequest;
 import com.hoily.service.whale.acl.openai.request.ImageGenerateRequest;
 import com.hoily.service.whale.acl.openai.response.CompletionResponse;
 import com.hoily.service.whale.acl.openai.response.ImageResponse;
+import com.hoily.service.whale.acl.wechat.WechatRestTemplate;
+import com.hoily.service.whale.acl.wechat.base.WechatResponse;
+import com.hoily.service.whale.acl.wechat.customer.message.MessageTypingRequest;
 import com.hoily.service.whale.acl.wechat.message.OfficialMessageDTO;
 import com.hoily.service.whale.acl.wechat.message.OfficialTextMessageDTO;
 import com.hoily.service.whale.acl.wechat.message.UserMessageDTO;
 import com.hoily.service.whale.acl.wechat.message.UserTextMessageDTO;
+import com.hoily.service.whale.acl.wechat.util.MessageHelper;
 import com.hoily.service.whale.application.wechat.command.CommandExecutor;
 import com.hoily.service.whale.infrastructure.common.utils.JsonUtils;
 import com.hoily.service.whale.infrastructure.common.utils.StringUtils;
-import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Component;
 
+import java.util.Map;
 import java.util.Optional;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Future;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.TimeoutException;
 
 /**
  * description is here
@@ -28,11 +37,23 @@ import java.util.Optional;
  */
 @Slf4j
 @Component
-@AllArgsConstructor
 public class WechatMessageService {
+    private static final String DEFAULT_ANSWER = "不要意思，暂时回答不了你的问题哦~请联系管理员微信号\"vyckey0213\"！";
     private final OpenAIRestTemplate openAIRestTemplate;
+    private final WechatRestTemplate wechatRestTemplate;
     private final UserStateManager userStateManager;
     private final CommandExecutor commandExecutor;
+    private final ExecutorService executorService;
+
+    public WechatMessageService(OpenAIRestTemplate openAIRestTemplate, WechatRestTemplate wechatRestTemplate,
+                                UserStateManager userStateManager, CommandExecutor commandExecutor,
+                                @Qualifier("wechatExecutor") ExecutorService executorService) {
+        this.openAIRestTemplate = openAIRestTemplate;
+        this.wechatRestTemplate = wechatRestTemplate;
+        this.userStateManager = userStateManager;
+        this.commandExecutor = commandExecutor;
+        this.executorService = executorService;
+    }
 
     private Optional<String> completion(String model, String user, String content) {
         CreateCompletionRequest request = new CreateCompletionRequest(model);
@@ -111,5 +132,45 @@ public class WechatMessageService {
             return handleMessage((UserTextMessageDTO) userMessage);
         }
         return null;
+    }
+
+    public OfficialMessageDTO handleMessage(UserMessageDTO userMessage, long timeout, TimeUnit timeUnit) {
+        Future<OfficialMessageDTO> future = null;
+        try {
+            future = executorService.submit(() -> handleMessage(userMessage));
+            return future.get(timeout, timeUnit);
+        } catch (TimeoutException e) {
+            Future<OfficialMessageDTO> finalFuture = future;
+            // try to async send message
+            executorService.execute(() -> asyncSendMessage(userMessage.getFromUserName(), finalFuture));
+            wechatRestTemplate.sendMessageTyping(MessageTypingRequest.typing(userMessage.getFromUserName()));
+            return null;
+        } catch (Exception e) {
+            log.error("wechat-send ex", e);
+            // send default message
+            OfficialTextMessageDTO officialMessage = new OfficialTextMessageDTO();
+            officialMessage.setContent(DEFAULT_ANSWER);
+            officialMessage.setUserName(userMessage.getToUserName(), userMessage.getFromUserName());
+            officialMessage.setCreateTime(System.currentTimeMillis() / 1000L);
+            return officialMessage;
+        }
+    }
+
+    private void asyncSendMessage(String userId, Future<OfficialMessageDTO> future) {
+        try {
+            OfficialMessageDTO messageDTO = future.get();
+            Map<String, Object> customerMessage = MessageHelper.toCustomerMessage(messageDTO);
+            if (customerMessage == null) {
+                return;
+            }
+            WechatResponse<Void> response = wechatRestTemplate.sendCustomerMessage(messageDTO);
+            if (!response.isSuccess()) {
+                wechatRestTemplate.sendMessageTyping(MessageTypingRequest.cancel(userId));
+                log.warn("wechat-send {} fail {}", customerMessage, response.getErrorMsg());
+            }
+        } catch (Exception e) {
+            wechatRestTemplate.sendMessageTyping(MessageTypingRequest.cancel(userId));
+            log.error("wechat-async-send ex", e);
+        }
     }
 }

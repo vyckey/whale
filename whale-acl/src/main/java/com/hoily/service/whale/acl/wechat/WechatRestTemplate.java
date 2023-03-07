@@ -2,9 +2,11 @@ package com.hoily.service.whale.acl.wechat;
 
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.hoily.service.whale.acl.wechat.base.WechatResponse;
+import com.hoily.service.whale.acl.wechat.customer.message.MessageTypingRequest;
 import com.hoily.service.whale.acl.wechat.security.AccessTokenDTO;
 import com.hoily.service.whale.acl.wechat.security.AppConfig;
 import com.hoily.service.whale.infrastructure.common.utils.JsonUtils;
+import com.hoily.service.whale.infrastructure.common.utils.StringUtils;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Lazy;
@@ -83,5 +85,25 @@ public class WechatRestTemplate {
         return exchange("cgi-bin/token?grant_type=client_credential&appid={appId}&secret={appSecret}",
                 HttpMethod.GET, null, new TypeReference<WechatResponse<AccessTokenDTO>>() {
                 }, appConfig.getAppId(), appConfig.getAppSecret());
+    }
+
+    private String getAccessToken() {
+        String accessToken = authenticationManager.getOrRefreshAccessToken();
+        if (StringUtils.isBlank(accessToken)) {
+            throw new WechatRestException("fail to refresh access_token");
+        }
+        return accessToken;
+    }
+
+    public WechatResponse<Void> sendCustomerMessage(Object customerMessage) {
+        return exchange("cgi-bin/message/custom/send?access_token={accessToken}",
+                HttpMethod.POST, customerMessage, new TypeReference<WechatResponse<Void>>() {
+                }, getAccessToken());
+    }
+
+    public WechatResponse<Void> sendMessageTyping(MessageTypingRequest request) {
+        return exchange("cgi-bin/message/custom/typing?access_token={accessToken}",
+                HttpMethod.POST, request, new TypeReference<WechatResponse<Void>>() {
+                }, getAccessToken());
     }
 }

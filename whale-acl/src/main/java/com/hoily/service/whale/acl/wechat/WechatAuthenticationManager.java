@@ -8,11 +8,11 @@ import com.hoily.service.whale.acl.wechat.security.AppConfig;
 import com.hoily.service.whale.acl.wechat.security.EncryptionConfig;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.codec.digest.DigestUtils;
-import org.apache.commons.lang3.tuple.Pair;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
+import java.util.concurrent.atomic.AtomicReference;
 import java.util.stream.Collectors;
 
 /**
@@ -25,7 +25,7 @@ import java.util.stream.Collectors;
 @Component
 public class WechatAuthenticationManager {
     private final WechatRestTemplate wechatRestTemplate;
-    private final Pair<String, AccessToken> accessTokenHolder = Pair.of(null, null);
+    private final AtomicReference<AccessToken> accessTokenHolder = new AtomicReference<>();
     private AppConfig appConfig;
     private EncryptionConfig encryptionConfig;
 
@@ -64,18 +64,16 @@ public class WechatAuthenticationManager {
 
 
     public String getOrRefreshAccessToken() {
-        AccessToken accessToken = accessTokenHolder.getValue();
+        AccessToken accessToken = accessTokenHolder.get();
         if (accessToken == null || accessToken.isExpired()) {
-            synchronized (accessTokenHolder) {
-                WechatResponse<AccessTokenDTO> response = wechatRestTemplate.requestAccessToken();
-                if (response.isSuccess() && response.getResult() != null) {
-                    AccessTokenDTO result = response.getResult();
-                    accessToken = new AccessToken(result.getAccessToken(), result.getExpiredAfter());
-                } else {
-                    accessToken = null;
-                }
-                accessTokenHolder.setValue(accessToken);
+            WechatResponse<AccessTokenDTO> response = wechatRestTemplate.requestAccessToken();
+            if (response.isSuccess() && response.getResult() != null) {
+                AccessTokenDTO result = response.getResult();
+                accessToken = new AccessToken(result.getAccessToken(), result.getExpiredAfter());
+            } else {
+                accessToken = null;
             }
+            accessTokenHolder.set(accessToken);
         }
         return accessToken != null ? accessToken.getAccessToken() : null;
     }
