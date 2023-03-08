@@ -8,20 +8,21 @@ if [[ $? -ne 0 ]]; then
   docker -v
 fi
 
-DOCKER_IMAGE=$(docker images -q whale-api:latest)
-CONTAINERS=$(docker ps -a | awk '/whale-api/ {print $1}')
-
 if [[ "rebuild" == "$1" ]]; then
   echo "[whale-api] docker check..."
+  CONTAINERS=$(docker ps -a | awk '/whale-api/ {print $1}')
   if [[ !(-z $CONTAINERS) ]]; then
     docker stop $CONTAINERS
     docker rm $CONTAINERS
   fi
+
+  DOCKER_IMAGE=$(docker images -q whale-api:latest)
   if [[ !(-z $DOCKER_IMAGE) ]]; then
     docker image rm $DOCKER_IMAGE
   fi
 fi
 
+DOCKER_IMAGE=$(docker images -q whale-api:latest)
 if [[ -z $DOCKER_IMAGE ]]; then
   echo "[whale-api] docker start build..."
   docker build -t whale-api:latest .
