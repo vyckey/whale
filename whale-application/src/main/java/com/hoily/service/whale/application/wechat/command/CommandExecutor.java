@@ -58,16 +58,25 @@ public class CommandExecutor {
     }
 
     private String execute(ChatGPTCommand command, String user) {
+        final String output = "hoily get it!";
         UserState userState = userStateManager.createUserStateIfAbsent(user);
+        if (command.isReset()) {
+            userState.reset();
+            return output;
+        }
+
         if (StringUtils.isNotBlank(command.getTaskType())) {
             OpenAITaskType taskType = OpenAITaskType.of(command.getTaskType());
             if (taskType != null) {
                 userState.setOpenAITaskType(taskType);
             }
         }
+        if (StringUtils.isNotBlank(command.getTaskDesc())) {
+            userState.setOpenAITask(command.getTaskDesc());
+        }
         if (StringUtils.isNotBlank(command.getModel())) {
             userState.setOpenAIModel(command.getModel());
         }
-        return "hoily get it!";
+        return output;
     }
 }

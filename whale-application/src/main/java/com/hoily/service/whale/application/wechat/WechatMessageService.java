@@ -71,8 +71,12 @@ public class WechatMessageService {
         }
     }
 
-    private Optional<String> chatCompletion(String model, String user, String content) {
-        ChatCompletionRequest request = new ChatCompletionRequest(model, ChatMessage.user(content));
+    private Optional<String> chatCompletion(String model, String user, String task, String content) {
+        ChatCompletionRequest request = new ChatCompletionRequest(model);
+        if (StringUtils.isNotBlank(task)) {
+            request.addMessage(ChatMessage.system(task));
+        }
+        request.addMessage(ChatMessage.user(content));
         request.setTemperature(0.4f);
         request.setMaxTokens(1024);
         request.setUser(user);
@@ -112,7 +116,8 @@ public class WechatMessageService {
             answerOptional = Optional.ofNullable(commandExecutor.execute(content, userMessage.getFromUserName()));
             officialMessage.setContent(answerOptional.orElse(defaultAnswer));
         } else if (userState == null || OpenAITaskType.CHAT.equals(userState.getOpenAITaskType())) {
-            answerOptional = chatCompletion(modelOptional.orElse("gpt-3.5-turbo"), user, content);
+            String task = (userState != null) ? userState.getOpenAITask() : null;
+            answerOptional = chatCompletion(modelOptional.orElse("gpt-3.5-turbo"), user, task, content);
             officialMessage.setContent(answerOptional.orElse(defaultAnswer));
         } else if (OpenAITaskType.IMAGE.equals(userState.getOpenAITaskType())) {
             answerOptional = createImage(user, content);

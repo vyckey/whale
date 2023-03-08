@@ -13,9 +13,16 @@ public class UserState {
     private final String userId;
 
     private OpenAITaskType openAITaskType = OpenAITaskType.CHAT;
+    private String openAITask;
     private String openAIModel;
 
     public UserState(String userId) {
         this.userId = userId;
+    }
+
+    public void reset() {
+        this.openAITaskType = OpenAITaskType.CHAT;
+        this.openAITask = null;
+        this.openAIModel = null;
     }
 }

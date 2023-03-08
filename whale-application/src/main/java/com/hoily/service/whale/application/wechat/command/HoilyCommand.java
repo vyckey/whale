@@ -11,7 +11,7 @@ import lombok.Data;
  * @author vyckey
  */
 @Data
-@Parameters(commandNames = "hoily", commandDescription = "hoily commands")
+@Parameters(commandNames = "hoily", separators = "=", commandDescription = "hoily commands")
 public class HoilyCommand {
     @Parameter(names = {"--help", "-h"}, description = "help", help = true)
     private boolean help;

@@ -12,10 +12,16 @@ import java.util.List;
  * @author vyckey
  */
 @Data
-@Parameters(commandNames = "chatgpt", commandDescription = "ChatGPT commands")
+@Parameters(commandNames = "chatgpt", separators = "=", commandDescription = "ChatGPT commands")
 public class ChatGPTCommand {
-    @Parameter(names = {"--task", "-t"}, description = "set task type, include: chat_old, chat, image")
+    @Parameter(names = {"--reset"}, description = "reset chatgpt config")
+    private boolean reset;
+
+    @Parameter(names = {"--task-type", "-tt"}, description = "set task type, include: chat_old, chat, image")
     private String taskType;
+
+    @Parameter(names = {"--task", "-t"}, description = "set task description")
+    private String taskDesc;
 
     @Parameter(names = {"--model", "-m"}, description = "set model name")
     private String model;
