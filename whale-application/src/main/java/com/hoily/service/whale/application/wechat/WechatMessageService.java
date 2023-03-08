@@ -171,7 +171,6 @@ public class WechatMessageService {
             WechatResponse<Void> response = wechatRestTemplate.sendCustomerMessage(messageDTO);
             if (!response.isSuccess()) {
                 wechatRestTemplate.sendMessageTyping(MessageTypingRequest.cancel(userId));
-                log.warn("wechat-send {} fail {}", customerMessage, response.getErrorMsg());
             }
         } catch (Exception e) {
             wechatRestTemplate.sendMessageTyping(MessageTypingRequest.cancel(userId));

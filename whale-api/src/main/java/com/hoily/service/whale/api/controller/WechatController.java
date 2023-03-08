@@ -17,8 +17,6 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
 
-import java.util.concurrent.TimeUnit;
-
 /**
  * description is here
  *
@@ -44,12 +42,14 @@ public class WechatController {
         return "invalid signature";
     }
 
-    @PostMapping(value = "callback", consumes = {MediaType.TEXT_XML_VALUE, MediaType.APPLICATION_XML_VALUE}, produces = {MediaType.TEXT_XML_VALUE, MediaType.APPLICATION_XML_VALUE})
+    @PostMapping(value = "callback", consumes = {MediaType.TEXT_XML_VALUE, MediaType.APPLICATION_XML_VALUE},
+            produces = {MediaType.TEXT_XML_VALUE, MediaType.APPLICATION_XML_VALUE})
     @ResponseBody
     public XmlWrapper<OfficialMessageDTO> callback(@RequestBody XmlWrapper<UserMessageDTO> request) {
         UserMessageDTO userMessage = request.getObject();
         log.info("wechat callback message:{}", JsonUtils.toJson(userMessage));
-        OfficialMessageDTO officialMessage = wechatMessageService.handleMessage(userMessage, 4600, TimeUnit.MILLISECONDS);
+        OfficialMessageDTO officialMessage = wechatMessageService.handleMessage(userMessage);
+//        OfficialMessageDTO officialMessage = wechatMessageService.handleMessage(userMessage, 4600, TimeUnit.MILLISECONDS);
         log.info("wechat callback reply:{} => {}", userMessage.getFromUserName(), JsonUtils.toJson(officialMessage));
         return officialMessage != null ? XmlWrapper.of(officialMessage) : null;
     }

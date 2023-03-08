@@ -72,12 +72,18 @@ public class WechatRestTemplate {
         httpHeaders.setContentType(MediaType.APPLICATION_JSON);
         httpHeaders.setAccept(Collections.singletonList(MediaType.APPLICATION_JSON));
         HttpEntity<String> httpEntity = new HttpEntity<>(requestBody, httpHeaders);
-        return exchange(uri, method, httpEntity, new ParameterizedTypeReference<T>() {
+        T response = exchange(uri, method, httpEntity, new ParameterizedTypeReference<T>() {
             @Override
             public Type getType() {
                 return responseType.getType();
             }
         }, uriVariables);
+
+        WechatResponse<?> resp;
+        if (response instanceof WechatResponse && !(resp = (WechatResponse<?>) response).isSuccess()) {
+            log.warn("wechat [{}]: errcode:{}, errmsg:{}", uri, resp.getErrorCode(), resp.getErrorMsg());
+        }
+        return response;
     }
 
     public WechatResponse<AccessTokenDTO> requestAccessToken() {

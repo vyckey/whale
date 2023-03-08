@@ -71,7 +71,6 @@ public class WechatAuthenticationManager {
                 AccessTokenDTO result = response.getResult();
                 accessToken = new AccessToken(result.getAccessToken(), result.getExpiredAfter());
             } else {
-                log.warn("wechat refresh access_token fail [{}]{}", response.getErrorCode(), response.getErrorMsg());
                 accessToken = null;
             }
             accessTokenHolder.set(accessToken);
