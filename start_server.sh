@@ -18,7 +18,7 @@ if [[ "rebuild" == "$1" ]]; then
     docker rm $CONTAINERS
   fi
   if [[ !(-z $DOCKER_IMAGE) ]]; then
-    docker container rm $DOCKER_IMAGE
+    docker image rm $DOCKER_IMAGE
   fi
 fi
 
@@ -28,6 +28,7 @@ if [[ -z $DOCKER_IMAGE ]]; then
 fi
 
 echo "[whale-api] docker start run..."
+CONTAINERS=$(docker ps -a | awk '/whale-api/ {print $1}')
 if [[ -z $CONTAINERS ]]; then
   docker run -it -p 80:8080 whale-api:latest
 else

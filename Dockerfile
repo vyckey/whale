@@ -6,7 +6,7 @@ COPY . /app/
 
 VOLUME build/
 
-RUN gradle clean -Dprofile=production --build-cache bootJar --profile --parallel
+RUN gradle clean -Dprofile=production bootJar --profile --parallel
 
 FROM openjdk:8
 
