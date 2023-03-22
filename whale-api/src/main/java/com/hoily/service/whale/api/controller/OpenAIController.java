@@ -9,9 +9,9 @@ import com.hoily.service.whale.acl.openai.response.ListResultResponse;
 import com.hoily.service.whale.acl.openai.response.ModelInfoResponse;
 import com.hoily.service.whale.contract.response.BaseResponse;
 import com.hoily.service.whale.infrastructure.common.utils.JsonUtils;
+import com.hoily.service.whale.infrastructure.common.utils.StringUtils;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -100,7 +100,7 @@ public class OpenAIController {
             uiModel.addAttribute("question", content);
             CompletionResponse response = openAIRestTemplateFactory.createTemplate(apiKey).chatCompletion(completionRequest);
             String answer = Optional.ofNullable(response).map(CompletionResponse::getPossibleContent).orElse("");
-            uiModel.addAttribute("answer", answer);
+            uiModel.addAttribute("answer", StringUtils.trim(answer, '\n'));
         } catch (Exception e) {
             log.error("openai chat completion fail, content:{}", content, e);
             uiModel.addAttribute("answer", "Sorry, something is wrong! Please contact author \"vyckey\".");
