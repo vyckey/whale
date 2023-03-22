@@ -17,17 +17,15 @@ import com.hoily.service.whale.acl.openai.response.ImageResponse;
 import com.hoily.service.whale.acl.openai.response.ListResultResponse;
 import com.hoily.service.whale.acl.openai.response.ModelInfoResponse;
 import com.hoily.service.whale.infrastructure.common.utils.JsonUtils;
+import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
-import org.springframework.stereotype.Component;
 import org.springframework.web.client.HttpStatusCodeException;
 import org.springframework.web.client.RestClientException;
 import org.springframework.web.client.RestTemplate;
@@ -45,7 +43,7 @@ import java.util.Collections;
  * 2023/2/12 13:18
  */
 @Slf4j
-@Component
+@Getter
 public class OpenAIRestTemplate {
     private static final String OPENAI_DOMAIN = "https://api.openai.com";
     private final HttpServletRequest request;
@@ -57,9 +55,9 @@ public class OpenAIRestTemplate {
         this.restTemplate = restTemplate;
     }
 
-    @Autowired
-    public void setBase64ApiKey(@Value("${openai.authentication.api_key}") String apiKey) {
+    public OpenAIRestTemplate setApiKey(String apiKey) {
         this.apiKey = apiKey;
+        return this;
     }
 
     private <T> T exchange(String uri, HttpMethod method, HttpEntity<?> requestEntity, ParameterizedTypeReference<T> responseType, Object... uriVariables) {

@@ -117,7 +117,7 @@ public class WechatMessageService {
             officialMessage.setContent(answerOptional.orElse(defaultAnswer));
         } else if (userState == null || OpenAITaskType.CHAT.equals(userState.getOpenAITaskType())) {
             String task = (userState != null) ? userState.getOpenAITask() : null;
-            answerOptional = chatCompletion(modelOptional.orElse("gpt-3.5-turbo"), user, task, content);
+            answerOptional = chatCompletion(modelOptional.orElse("gpt-3.5-turbo-0301"), user, task, content);
             officialMessage.setContent(answerOptional.orElse(defaultAnswer));
         } else if (OpenAITaskType.IMAGE.equals(userState.getOpenAITaskType())) {
             answerOptional = createImage(user, content);

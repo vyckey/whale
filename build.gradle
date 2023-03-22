@@ -41,6 +41,7 @@ ext {
     springAspectsVersion = '5.3.21'
     mysqlConnectorVersion = '8.0.29'
     hibernateValidatorVersion = '8.0.0.Final'
+    commonmarkVersion = '0.17.0'
     jcommanderVersion = '1.82'
 
 }
@@ -169,6 +170,7 @@ subprojects {
     if (!excludedModules.contains(it.name)) {
         dependencies {
             implementation "org.springframework.boot:spring-boot-starter:$springBootVersion"
+            implementation "org.springframework.boot:spring-boot-starter-thymeleaf:$springBootVersion"
             implementation "org.springframework.boot:spring-boot-starter-web:$springBootVersion"
             implementation "org.springframework.boot:spring-boot-starter-aop:$springBootVersion"
             implementation "org.springframework:spring-aspects:$springAspectsVersion"
@@ -211,6 +213,7 @@ project(":whale-infrastructure") {
 
         api "com.fasterxml.jackson.dataformat:jackson-dataformat-xml:$jacksonVersion"
         api "commons-codec:commons-codec:$commonsCodecVersion"
+        api "com.atlassian.commonmark:commonmark:$commonmarkVersion"
     }
 }
 
