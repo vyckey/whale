@@ -105,7 +105,7 @@ public class OpenAIController {
             log.error("openai chat completion fail, content:{}", content, e);
             uiModel.addAttribute("answer", "Sorry, something is wrong! Please contact author \"vyckey\".");
         }
-        return "/openai/completion";
+        return "openai/completion";
     }
 
 }
