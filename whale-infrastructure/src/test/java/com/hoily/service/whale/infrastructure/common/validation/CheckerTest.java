@@ -114,8 +114,8 @@ public class CheckerTest {
 
     @Test
     public void fluentCheckTest() {
-        CheckResultTest instance = new CheckResultTest();
-        Checker<CheckResultTest> checker1 = Checker.<CheckResultTest>success()
+        CheckerTest instance = new CheckerTest();
+        Checker<CheckerTest> checker1 = Checker.<CheckerTest>success()
                 .andCheck(this::function2, "func2 fail");
         CheckResult checkResult1 = checker1.check(instance);
         Assert.assertTrue(checkResult1.isSuccess());
@@ -127,7 +127,7 @@ public class CheckerTest {
         Assert.assertFalse(checkResult2.isSuccess());
         Assert.assertEquals("func1 fail", checkResult2.getMessage());
 
-        Checker<CheckResultTest> checker2 = checker1.orCheck(this::function4, "func4 fail");
+        Checker<CheckerTest> checker2 = checker1.orCheck(this::function4, "func4 fail");
         CheckResult checkResult3 = checker2.check(instance);
         Assert.assertTrue(checkResult3.isSuccess());
 
@@ -136,19 +136,19 @@ public class CheckerTest {
         Assert.assertEquals("fail", checkResult4.getMessage());
     }
 
-    private boolean function1(CheckResultTest obj) {
+    private boolean function1(CheckerTest obj) {
         return false;
     }
 
-    private boolean function2(CheckResultTest obj) {
+    private boolean function2(CheckerTest obj) {
         return true;
     }
 
-    public boolean function3(CheckResultTest obj) {
+    public boolean function3(CheckerTest obj) {
         return true;
     }
 
-    private boolean function4(CheckResultTest obj) {
+    private boolean function4(CheckerTest obj) {
         return false;
     }
 }
