@@ -23,6 +23,8 @@ public class ResultTest {
         Assert.assertEquals(Optional.of("500"), Result.err("500").err());
         Assert.assertEquals(Optional.empty(), Result.err("500").ok());
 
+        Assert.assertEquals("value is null", Result.ok(null).notNullOr(() -> "value is null").unwrap());
+        Assert.assertFalse(Result.err("fail").notNullOr(() -> "value is null").isOk());
 
         Result<String, String> hello = Result.ok("hello");
         Assert.assertEquals(Result.ok(5), hello.inspect(System.out::println).map(String::length));

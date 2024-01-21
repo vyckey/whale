@@ -79,6 +79,14 @@ public final class Result<T, E> {
         return errMapper.apply(error);
     }
 
+    public Result<T, E> notNullOr(Supplier<T> supplier) {
+        Objects.requireNonNull(supplier);
+        if (isOk() && value == null) {
+            return ok(supplier.get());
+        }
+        return this;
+    }
+
     public Result<T, E> inspect(Consumer<T> consumer) {
         Objects.requireNonNull(consumer);
         if (isOk()) {
