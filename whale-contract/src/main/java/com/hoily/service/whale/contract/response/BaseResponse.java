@@ -15,8 +15,8 @@ import java.io.Serializable;
 @ToString
 public class BaseResponse<T> implements Serializable {
     protected boolean success;
-    protected Integer errorCode;
-    protected String errorMsg;
+    protected Integer code;
+    protected String message;
     protected T result;
 
     private BaseResponse() {
@@ -24,12 +24,16 @@ public class BaseResponse<T> implements Serializable {
 
     private BaseResponse(Builder<T> builder) {
         this.success = builder.success;
-        this.errorCode = builder.errorCode;
-        this.errorMsg = builder.errorMsg;
+        this.code = builder.code;
+        this.message = builder.message;
         this.result = builder.result;
     }
 
-    public static <T> BaseResponse<T> createSuccess() {
+    public Builder<T> toBuilder() {
+        return new Builder<T>(success).code(code).message(message).result(result);
+    }
+
+    public static <T> BaseResponse<T> successResponse() {
         return new Builder<T>(true).build();
     }
 
@@ -37,8 +41,16 @@ public class BaseResponse<T> implements Serializable {
         return new Builder<>(true);
     }
 
-    public static <T> Builder<T> success(T data) {
-        return new Builder<T>(true).result(data);
+    public static <T> BaseResponse<T> successResponse(T result) {
+        return success(result).build();
+    }
+
+    public static <T> Builder<T> success(T result) {
+        return new Builder<T>(true).result(result);
+    }
+
+    public static <T> BaseResponse<T> failResponse(int errorCode, String errorMsg) {
+        return new Builder<T>(false).code(errorCode).message(errorMsg).build();
     }
 
     public static <T> Builder<T> fail() {
@@ -46,26 +58,26 @@ public class BaseResponse<T> implements Serializable {
     }
 
     public static <T> Builder<T> fail(int errorCode, String errorMsg) {
-        return new Builder<T>(false).errorCode(errorCode).errorMsg(errorMsg);
+        return new Builder<T>(false).code(errorCode).message(errorMsg);
     }
 
     public static final class Builder<T> {
-        private boolean success;
-        private Integer errorCode;
-        private String errorMsg;
+        private final boolean success;
+        private Integer code;
+        private String message;
         private T result;
 
         private Builder(boolean success) {
             this.success = success;
         }
 
-        public Builder<T> errorCode(Integer errorCode) {
-            this.errorCode = errorCode;
+        public Builder<T> code(Integer code) {
+            this.code = code;
             return this;
         }
 
-        public Builder<T> errorMsg(String errorMsg) {
-            this.errorMsg = errorMsg;
+        public Builder<T> message(String message) {
+            this.message = message;
             return this;
         }
 
