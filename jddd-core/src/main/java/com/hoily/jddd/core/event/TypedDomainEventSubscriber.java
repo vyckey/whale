@@ -9,7 +9,7 @@ package com.hoily.jddd.core.event;
 public abstract class TypedDomainEventSubscriber<E extends DomainEvent> implements DomainEventSubscriber {
     protected final Class<E> subscribedType;
 
-    public TypedDomainEventSubscriber(Class<E> subscribedType) {
+    protected TypedDomainEventSubscriber(Class<E> subscribedType) {
         this.subscribedType = subscribedType;
     }
 

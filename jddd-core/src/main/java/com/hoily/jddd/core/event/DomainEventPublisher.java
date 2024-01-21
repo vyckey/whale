@@ -1,17 +1,17 @@
 package com.hoily.jddd.core.event;
 
+import java.io.Closeable;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.CopyOnWriteArrayList;
 
 /**
  * {@link DomainEvent} Publisher
  *
  * @author vyckey
- * 2022/6/24 12:45
  */
-public class DomainEventPublisher {
-    private static final ThreadLocal<List<DomainEventSubscriber>> subscribers = new ThreadLocal<>();
-    private static final ThreadLocal<Boolean> publishing = new ThreadLocal<>();
+public class DomainEventPublisher implements Closeable {
+    private static final ThreadLocal<List<DomainEventSubscriber>> SUBSCRIBERS = new ThreadLocal<>();
 
     protected DomainEventPublisher() {
     }
@@ -21,37 +21,33 @@ public class DomainEventPublisher {
     }
 
     public <E extends DomainEvent> void publish(E domainEvent) {
-        if (Boolean.TRUE.equals(publishing.get())) {
+        List<DomainEventSubscriber> subscribers = DomainEventPublisher.SUBSCRIBERS.get();
+        if (subscribers == null) {
             return;
         }
-        try {
-            publishing.set(true);
-            List<DomainEventSubscriber> subscribers = DomainEventPublisher.subscribers.get();
-            if (subscribers !=null) {
-                for (DomainEventSubscriber subscriber : subscribers) {
-                    if (subscriber.subscribedToEvent(domainEvent)) {
-                        subscriber.handleEvent(domainEvent);
-                    }
-                }
+        List<DomainEventSubscriber> cloneSubscribers = new CopyOnWriteArrayList<>(subscribers);
+        for (DomainEventSubscriber subscriber : cloneSubscribers) {
+            if (subscriber.subscribedToEvent(domainEvent)) {
+                subscriber.handleEvent(domainEvent);
             }
-        } finally {
-            publishing.set(false);
         }
     }
 
-    public <E extends DomainEvent> void subscribe(DomainEventSubscriber subscriber) {
-        if (Boolean.TRUE.equals(publishing.get())) {
-            return;
-        }
-        List<DomainEventSubscriber> subscribers = DomainEventPublisher.subscribers.get();
+    public void subscribe(DomainEventSubscriber subscriber) {
+        List<DomainEventSubscriber> subscribers = DomainEventPublisher.SUBSCRIBERS.get();
         if (subscribers == null) {
             subscribers = new ArrayList<>();
-            DomainEventPublisher.subscribers.set(subscribers);
+            DomainEventPublisher.SUBSCRIBERS.set(subscribers);
         }
         subscribers.add(subscriber);
     }
 
     public void resetSubscribers() {
-        DomainEventPublisher.subscribers.remove();
+        DomainEventPublisher.SUBSCRIBERS.remove();
+    }
+
+    @Override
+    public void close() {
+        SUBSCRIBERS.remove();
     }
 }
